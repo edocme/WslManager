@@ -24,7 +24,7 @@ A full-featured WSL (Windows Subsystem for Linux) management GUI built with **Ic
 
 | Overview | Distro Detail | Config Editor |
 |----------|---------------|---------------|
-| ![Overview](screenshots/overview.png) | ![Detail](screenshots/detail.png) | ![Config](screenshots/config.png) |
+| ![Overview](blob/main/screenshots/overview.png) | ![Detail](blob/main/screenshots/detail.png) | ![Config](blob/main/screenshots/config.png) |
 
 ## Prerequisites
 
