@@ -196,7 +196,7 @@ impl WslManager {
             install_tar_path: String::new(),
             install_vhdx_path: String::new(),
             monitor_data: MonitorData::default(),
-            current_lang: Language::English,
+            current_lang: Language::Chinese,
             loading_operation: None,
         };
         (app, Task::perform(wsl::refresh_distros(), Message::DistrosLoaded))

@@ -1,0 +1,9 @@
+#include <winuser.h>
+
+16 ICON "favicon48_ico\\favicon16.ico"
+32 ICON "favicon48_ico\\favicon32.ico"
+48 ICON "favicon48_ico\\favicon48.ico"
+64 ICON "favicon48_ico\\favicon64.ico"
+128 ICON "favicon48_ico\\favicon128.ico"
+256 ICON "favicon48_ico\\favicon256.ico"
+512 ICON "favicon48_ico\\favicon512.ico"

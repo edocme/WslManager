@@ -4,16 +4,19 @@ version = "0.1.0"
 edition = "2021"
 description = "A full-featured WSL management tool built with Iced + Rust"
 license = "MIT"
-repository = "https://github.com/edocme/WslManage"
+repository = "https://github.com/edocme/WslManager"
 readme = "README.md"
 keywords = ["wsl", "windows", "linux", "manager", "iced"]
 categories = ["command-line-utilities", "gui"]
 
 [dependencies]
 iced = { version = "0.13", features = ["tokio", "image"] }
-tokio = { version = "1", features = ["process", "fs", "time"] }
+tokio = { version = "1", features = ["process", "fs", "time", "io-util"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 regex = "1"
 anyhow = "1"
 chrono = "0.4"
+
+[build-dependencies]
+embed-resource = "3"

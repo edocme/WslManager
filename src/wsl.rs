@@ -55,6 +55,44 @@ pub async fn execute_wsl(args: &[&str]) -> Result<String, String> {
     Ok(stdout)
 }
 
+async fn execute_wsl_with_stdin(args: &[&str], input: &[u8]) -> Result<String, String> {
+    use tokio::io::AsyncWriteExt;
+    let wsl_path = find_wsl_exe();
+    let mut child = tokio::process::Command::new(&wsl_path)
+        .args(args)
+        .creation_flags(0x08000000)
+        .stdin(std::process::Stdio::piped())
+        .stdout(std::process::Stdio::piped())
+        .stderr(std::process::Stdio::piped())
+        .spawn()
+        .map_err(|e| format!("Failed to run wsl: {}", e))?;
+
+    if let Some(mut stdin) = child.stdin.take() {
+        stdin
+            .write_all(input)
+            .await
+            .map_err(|e| format!("Failed to write stdin: {}", e))?;
+        drop(stdin);
+    }
+
+    let output = child
+        .wait_with_output()
+        .await
+        .map_err(|e| format!("Failed to wait for wsl: {}", e))?;
+
+    let stdout = decode_output(&output.stdout);
+    let stderr = decode_output(&output.stderr);
+
+    if !output.status.success() {
+        let err_lower = stderr.to_lowercase();
+        if err_lower.contains("error") || err_lower.contains("failed") {
+            return Err(format!("WSL error: {}", stderr.trim()));
+        }
+    }
+
+    Ok(stdout)
+}
+
 pub async fn refresh_distros() -> String {
     match execute_wsl(&["-l", "-v"]).await {
         Ok(output) => {
@@ -395,26 +433,19 @@ pub async fn save_config(
         }
         ConfigType::WslConf => {
             let name = distro_name.ok_or("No distro selected")?;
-            let temp_dir = std::env::temp_dir();
-            let tmp_win = temp_dir.join("wsl-tmp-wsl.conf");
-            let tmp_linux = "/tmp/wsl-tmp-wsl.conf";
 
-            if let Err(e) = tokio::fs::write(&tmp_win, &content).await {
-                return Err(format!("Failed to write temp file: {}", e));
-            }
-
-            execute_wsl(&[
-                "-d",
-                &name,
-                "--",
-                "sudo",
-                "cp",
-                tmp_linux,
-                "/etc/wsl.conf",
-            ])
+            execute_wsl_with_stdin(
+                &[
+                    "-d",
+                    &name,
+                    "--",
+                    "sudo",
+                    "tee",
+                    "/etc/wsl.conf",
+                ],
+                content.as_bytes(),
+            )
             .await?;
-
-            let _ = tokio::fs::remove_file(&tmp_win).await;
 
             Ok(format!(
                 "[{}] wsl.conf saved for {}",
